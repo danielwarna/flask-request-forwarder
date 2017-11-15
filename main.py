@@ -1,4 +1,4 @@
-from flask import Flask, request,render_template
+from flask import Flask, request,render_template, redirect
 app = Flask(__name__)
 import os
 
@@ -32,8 +32,8 @@ f.close()
 
 loop = [item.strip() for item in loop]
 
-@app.route('/')
-def routing():
+# Return current index, update(increment) and save it
+def nextIndex():
 	global currentIdx
 
 	tempIDX = currentIdx
@@ -42,12 +42,28 @@ def routing():
 	if currentIdx == len(loop):
 		currentIdx = 0
 
-	msg = 'Hello, World!'+str(tempIDX)+ " -- " + str(loop[tempIDX])
-
 	with open(currentIndexFile, "w") as f:
 		f.write(str(currentIdx))
 
+	return tempIDX
+
+@app.route('/')
+def routing():
+	global currentIdx
+
+	nextIdx = nextIndex()
+
+	msg = 'Hello, World!'+str(nextIdx)+ " -- " + str(loop[nextIdx])
+
 	return msg
+
+@app.route('/redirect')
+def redir():
+	
+	nextIdx = nextIndex()
+	url = loop[nextIdx] 
+
+	return redirect(url)
 
 @app.route('/settings'+settingSecret, methods=['GET', 'POST'])
 def settings():
