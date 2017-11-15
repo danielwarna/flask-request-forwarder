@@ -9,12 +9,23 @@ import os
 # 4: Save currentindex in a file as well, just in case
 # 5: Logging
 
+loopFile = "workfile"
+currentIndexFile = "indexfile"
+
 settingSecret = "secret"
 
 loop = ["URL 1","URL 3","URL 1","URL 2","URL 1"]
 currentIdx = 0
 
-with open("workfile", "r") as f:
+try: 
+	with open(currentIndexFile, "r") as indexf:
+		currentIdx = int(indexf.read())
+	indexf.close()
+except:
+	print("noindexfile")
+
+
+with open(loopFile, "r") as f:
 	content = f.readlines()
 	loop = content
 f.close()
@@ -33,6 +44,9 @@ def routing():
 
 	msg = 'Hello, World!'+str(tempIDX)+ " -- " + str(loop[tempIDX])
 
+	with open(currentIndexFile, "w") as f:
+		f.write(str(currentIdx))
+
 	return msg
 
 @app.route('/settings'+settingSecret, methods=['GET', 'POST'])
@@ -45,7 +59,7 @@ def settings():
 		urls = request.form.get('urls')
 		loop = urls.split("\n")
 
-		with open('workfile', 'w') as f:
+		with open(loopFile, 'w') as f:
 			f.write(''.join(loop))
 		f.close()
 		
