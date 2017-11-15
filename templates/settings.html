@@ -1,0 +1,11 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+One url per line please
+<form method="POST">
+	<textarea name="urls">{{loop}}</textarea>
+	<input type="submit" value="Save">
+</form>
+
+{% endblock %}

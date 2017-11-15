@@ -1,5 +1,6 @@
-from flask import Flask, request
+from flask import Flask, request,render_template
 app = Flask(__name__)
+import os
 
 # TODO
 # 1: Add admin view template
@@ -13,6 +14,13 @@ settingSecret = "secret"
 loop = ["URL 1","URL 3","URL 1","URL 2","URL 1"]
 currentIdx = 0
 
+with open("workfile", "r") as f:
+	content = f.readlines()
+	loop = content
+f.close()
+
+loop = [item.strip() for item in loop]
+
 @app.route('/')
 def routing():
 	global currentIdx
@@ -23,21 +31,25 @@ def routing():
 	if currentIdx == len(loop):
 		currentIdx = 0
 
-	msg = 'Hello, World!'+str(tempIDX)
+	msg = 'Hello, World!'+str(tempIDX)+ " -- " + str(loop[tempIDX])
 
 	return msg
 
 @app.route('/settings'+settingSecret, methods=['GET', 'POST'])
 def settings():
 	global currentIdx
+	global loop
 
 	if request.method=="POST":
-		with open('workfile', 'w') as f:
-			f.write("NewFile"+ str(currentIdx))
-		f.close()
-		return "Updating settings"
-	else:
-		with open('workfile', 'w') as f:
-			f.write("NewFile"+ str(currentIdx))
 
-		return ' Settings'
+		urls = request.form.get('urls')
+		loop = urls.split("\n")
+
+		with open('workfile', 'w') as f:
+			f.write(''.join(loop))
+		f.close()
+		
+		return render_template('settings.html', loop="\n".join(loop))
+	else:
+		print(loop)
+		return render_template('settings.html', loop="\n".join(loop))
