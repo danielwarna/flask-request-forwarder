@@ -3,10 +3,10 @@ app = Flask(__name__)
 import os
 
 # TODO
-# 1: Add admin view template
-# 2: Automatic redirect or with a template
+# 1: DONE Add admin view template
+# 2: DONE Automatic redirect or with a template 
 # 3: Cookie to remember where the user was sent last time, easy way to avoid repeats from the same user
-# 4: Save currentindex in a file as well, just in case
+# 4: DONE Save currentindex in a file as well, just in case
 # 5: Logging
 
 loopFile = "workfile"
