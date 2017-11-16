@@ -1,6 +1,8 @@
 from flask import Flask, request,render_template, redirect
 app = Flask(__name__)
 import os
+import logging
+from logging.handlers import RotatingFileHandler
 
 # TODO
 # 1: DONE Add admin view template
@@ -8,6 +10,14 @@ import os
 # 3: Cookie to remember where the user was sent last time, easy way to avoid repeats from the same user
 # 4: DONE Save currentindex in a file as well, just in case
 # 5: Logging
+
+
+file_handler = RotatingFileHandler('forwarder.log', maxBytes=1024 * 1024 * 100, backupCount=10)
+file_handler.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+file_handler.setFormatter(formatter)
+app.logger.setLevel(logging.INFO)
+app.logger.addHandler(file_handler)
 
 loopFile = "workfile"
 currentIndexFile = "indexfile"
@@ -32,6 +42,9 @@ f.close()
 
 loop = [item.strip() for item in loop]
 
+app.logger.info("Starting up with index: " + str(currentIdx))
+app.logger.info("Starting up with loop: " + str(loop))
+
 # Return current index, update(increment) and save it
 def nextIndex():
 	global currentIdx
@@ -53,6 +66,8 @@ def routing():
 
 	nextIdx = nextIndex()
 
+	app.logger.info("Showing index " + str(nextIdx) + " - " + loop[nextIdx])
+
 	msg = 'Hello, World!'+str(nextIdx)+ " -- " + str(loop[nextIdx])
 	url = str(loop[nextIdx])
 	return render_template("forward.html", content=url)
@@ -62,6 +77,9 @@ def routing():
 def redir():
 	
 	nextIdx = nextIndex()
+
+	app.logger.info("Forwarding index " + str(nextIdx) + " - " + loop[nextIdx])
+
 	url = loop[nextIdx] 
 
 	return redirect(url)
@@ -79,6 +97,8 @@ def settings():
 		with open(loopFile, 'w') as f:
 			f.write(''.join(loop))
 		f.close()
+
+		app.logger.info("Update urllist to: " + str(loop))
 		
 		return render_template('settings.html', loop="\n".join(loop))
 	else:
