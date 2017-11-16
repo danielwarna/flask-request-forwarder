@@ -54,7 +54,8 @@ def routing():
 	nextIdx = nextIndex()
 
 	msg = 'Hello, World!'+str(nextIdx)+ " -- " + str(loop[nextIdx])
-
+	url = str(loop[nextIdx])
+	return render_template("forward.html", content=url)
 	return msg
 
 @app.route('/redirect')
