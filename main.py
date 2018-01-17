@@ -1,8 +1,7 @@
-from flask import Flask, request,render_template, redirect
-app = Flask(__name__)
-import os
 import logging
 from logging.handlers import RotatingFileHandler
+
+from flask import Flask, request, render_template, redirect
 
 # TODO
 # 1: DONE Add admin view template
@@ -11,6 +10,7 @@ from logging.handlers import RotatingFileHandler
 # 4: DONE Save currentindex in a file as well, just in case
 # 5: Logging
 
+app = Flask(__name__)
 
 file_handler = RotatingFileHandler('forwarder.log', maxBytes=1024 * 1024 * 100, backupCount=10)
 file_handler.setLevel(logging.INFO)
@@ -55,8 +55,8 @@ def nextIndex():
     if currentIdx == len(loop):
         currentIdx = 0
 
-    with open(currentIndexFile, "w") as f:
-        f.write(str(currentIdx))
+    with open(currentIndexFile, "w") as workfile:
+        workfile.write(str(currentIdx))
 
     return tempIDX
 
@@ -68,19 +68,19 @@ def routing():
 
     app.logger.info("Showing index " + str(nextIdx) + " - " + loop[nextIdx])
 
-    msg = 'Hello, World!'+str(nextIdx)+ " -- " + str(loop[nextIdx])
+    # msg = 'Hello, World!'+str(nextIdx)+ " -- " + str(loop[nextIdx])
     url = str(loop[nextIdx])
     return render_template("forward.html", content=url)
-    return msg
+    # return msg
 
 @app.route('/redirect')
 def redir():
-    
+
     nextIdx = nextIndex()
 
     app.logger.info("Forwarding index " + str(nextIdx) + " - " + loop[nextIdx])
 
-    url = loop[nextIdx] 
+    url = loop[nextIdx]
 
     return redirect(url)
 
@@ -89,17 +89,17 @@ def settings():
     global currentIdx
     global loop
 
-    if request.method=="POST":
+    if request.method == "POST":
 
         urls = request.form.get('urls')
         loop = urls.split("\n")
 
-        with open(loopFile, 'w') as f:
-            f.write(''.join(loop))
-        f.close()
+        with open(loopFile, 'w') as workfile:
+            workfile.write(''.join(loop))
+        workfile.close()
 
         app.logger.info("Update urllist to: " + str(loop))
-        
+
         return render_template('settings.html', loop="\n".join(loop))
     else:
         print(loop)
