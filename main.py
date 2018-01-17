@@ -12,10 +12,12 @@ from flask import Flask, request, render_template, redirect
 
 app = Flask(__name__)
 
-file_handler = RotatingFileHandler('forwarder.log', maxBytes=1024 * 1024 * 100, backupCount=10)
+logFilename = "forwarder.log" 
+logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+
+file_handler = RotatingFileHandler(logFilename, maxBytes=1024 * 1024 * 100, backupCount=10)
 file_handler.setLevel(logging.INFO)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-file_handler.setFormatter(formatter)
+file_handler.setFormatter(logFormatter)
 app.logger.setLevel(logging.INFO)
 app.logger.addHandler(file_handler)
 
@@ -104,3 +106,11 @@ def settings():
     else:
         print(loop)
         return render_template('settings.html', loop="\n".join(loop))
+
+
+@app.route('/settings' + settingSecret + '/log', methods=['GET'])
+def showlog():
+    with open(logFilename, "r") as logfile:
+        loglines = logfile.readlines()
+
+    return render_template("logs.html", logs=loglines)
