@@ -28,16 +28,16 @@ loop = ["URL 1","URL 3","URL 1","URL 2","URL 1"]
 currentIdx = 0
 
 try: 
-	with open(currentIndexFile, "r") as indexf:
-		currentIdx = int(indexf.read())
-	indexf.close()
+    with open(currentIndexFile, "r") as indexf:
+        currentIdx = int(indexf.read())
+    indexf.close()
 except:
-	print("noindexfile")
+    print("noindexfile")
 
 
 with open(loopFile, "r") as f:
-	content = f.readlines()
-	loop = content
+    content = f.readlines()
+    loop = content
 f.close()
 
 loop = [item.strip() for item in loop]
@@ -47,60 +47,60 @@ app.logger.info("Starting up with loop: " + str(loop))
 
 # Return current index, update(increment) and save it
 def nextIndex():
-	global currentIdx
+    global currentIdx
 
-	tempIDX = currentIdx
+    tempIDX = currentIdx
 
-	currentIdx = currentIdx + 1
-	if currentIdx == len(loop):
-		currentIdx = 0
+    currentIdx = currentIdx + 1
+    if currentIdx == len(loop):
+        currentIdx = 0
 
-	with open(currentIndexFile, "w") as f:
-		f.write(str(currentIdx))
+    with open(currentIndexFile, "w") as f:
+        f.write(str(currentIdx))
 
-	return tempIDX
+    return tempIDX
 
 @app.route('/')
 def routing():
-	global currentIdx
+    global currentIdx
 
-	nextIdx = nextIndex()
+    nextIdx = nextIndex()
 
-	app.logger.info("Showing index " + str(nextIdx) + " - " + loop[nextIdx])
+    app.logger.info("Showing index " + str(nextIdx) + " - " + loop[nextIdx])
 
-	msg = 'Hello, World!'+str(nextIdx)+ " -- " + str(loop[nextIdx])
-	url = str(loop[nextIdx])
-	return render_template("forward.html", content=url)
-	return msg
+    msg = 'Hello, World!'+str(nextIdx)+ " -- " + str(loop[nextIdx])
+    url = str(loop[nextIdx])
+    return render_template("forward.html", content=url)
+    return msg
 
 @app.route('/redirect')
 def redir():
-	
-	nextIdx = nextIndex()
+    
+    nextIdx = nextIndex()
 
-	app.logger.info("Forwarding index " + str(nextIdx) + " - " + loop[nextIdx])
+    app.logger.info("Forwarding index " + str(nextIdx) + " - " + loop[nextIdx])
 
-	url = loop[nextIdx] 
+    url = loop[nextIdx] 
 
-	return redirect(url)
+    return redirect(url)
 
 @app.route('/settings'+settingSecret, methods=['GET', 'POST'])
 def settings():
-	global currentIdx
-	global loop
+    global currentIdx
+    global loop
 
-	if request.method=="POST":
+    if request.method=="POST":
 
-		urls = request.form.get('urls')
-		loop = urls.split("\n")
+        urls = request.form.get('urls')
+        loop = urls.split("\n")
 
-		with open(loopFile, 'w') as f:
-			f.write(''.join(loop))
-		f.close()
+        with open(loopFile, 'w') as f:
+            f.write(''.join(loop))
+        f.close()
 
-		app.logger.info("Update urllist to: " + str(loop))
-		
-		return render_template('settings.html', loop="\n".join(loop))
-	else:
-		print(loop)
-		return render_template('settings.html', loop="\n".join(loop))
+        app.logger.info("Update urllist to: " + str(loop))
+        
+        return render_template('settings.html', loop="\n".join(loop))
+    else:
+        print(loop)
+        return render_template('settings.html', loop="\n".join(loop))
