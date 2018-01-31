@@ -83,7 +83,8 @@ def redir():
     app.logger.info("Forwarding index " + str(nextIdx) + " - " + loop[nextIdx])
 
     url = loop[nextIdx]
-
+    url = url.strip('\n')
+    url = url.strip('\t')
     return redirect(url)
 
 @app.route('/settings'+settingSecret, methods=['GET', 'POST'])
