@@ -5,14 +5,14 @@ from flask import Flask, request, render_template, redirect
 
 # TODO
 # 1: DONE Add admin view template
-# 2: DONE Automatic redirect or with a template 
+# 2: DONE Automatic redirect or with a template
 # 3: Cookie to remember where the user was sent last time, easy way to avoid repeats from the same user
 # 4: DONE Save currentindex in a file as well, just in case
 # 5: Logging
 
 app = Flask(__name__)
 
-logFilename = "forwarder.log" 
+logFilename = "forwarder.log"
 logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
 file_handler = RotatingFileHandler(logFilename, maxBytes=1024 * 1024 * 100, backupCount=10)
@@ -29,7 +29,7 @@ settingSecret = "secret"
 loop = ["URL 1","URL 3","URL 1","URL 2","URL 1"]
 currentIdx = 0
 
-try: 
+try:
     with open(currentIndexFile, "r") as indexf:
         currentIdx = int(indexf.read())
     indexf.close()
@@ -69,11 +69,21 @@ def routing():
     nextIdx = nextIndex()
 
     app.logger.info("Showing index " + str(nextIdx) + " - " + loop[nextIdx])
+    print("Showing index " + str(nextIdx) + " - " + loop[nextIdx])
+
+    params = request.query_string
+    params = params.decode('utf8')
 
     # msg = 'Hello, World!'+str(nextIdx)+ " -- " + str(loop[nextIdx])
     url = str(loop[nextIdx])
+
+    if len(params) > 0:
+        app.logger.info("Found params+ " + params)
+        url = url + "?" + params
+
     return render_template("forward.html", content=url)
     # return msg
+
 
 @app.route('/redirect')
 def redir():
@@ -82,7 +92,15 @@ def redir():
 
     app.logger.info("Forwarding index " + str(nextIdx) + " - " + loop[nextIdx])
 
+    params = request.query_string
+    params = params.decode('utf8')
+
     url = loop[nextIdx]
+
+    if len(params) > 0:
+        app.logger.info("Found params+ " + params)
+        url = url + "?" + params
+
     url = url.strip('\n')
     url = url.strip('\t')
     return redirect(url)
@@ -115,3 +133,7 @@ def showlog():
         loglines = logfile.readlines()
 
     return render_template("logs.html", logs=loglines)
+
+
+if __name__ == "__main__":
+    app.run()
